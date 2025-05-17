@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools", "setuptools_scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "Meridian"
+description = "Meridianの送受信を行うツール"
+readme = "README.md"
+license = {file = "LICENSE"}
+version = "0.0.2"
+dependencies = [
+    "numpy",
+    "asyncio",
+]
+authors = [
+  {name = "Meridian Team"}
+]
+
+[project.urls]
+Homepage = "https://ninagawa123.github.io/Meridian_info/"
+
+[tool.setuptools.packages.find]
+exclude = ["build", "tests"]
