@@ -38,7 +38,7 @@ pip install -U [ビルドした.whl]
 | Net.set_magnet(x, y, z)                                             | 磁気センサーの値を設定する           |
 | Net.set_temperature(temp)                                           | 温度を設定する                       |
 | Net.set_dmp_direction(roll, pitch, yaw)                             | DMP値を設定する                      |
-| Net.set_remote_buttons(button : PadState)                           | PADのボタン値を設定する              |
+| Net.set_pad(button : PadState)                                      | PADのボタン値を設定する              |
 | Net.set_motion_frames(frames, stop_frames)                          | モーションフレームを設定する         |
 | Net.set_motion_data(index, motion_command1, motion_command2, value) | モーション（サーボ）の情報を設定する |
 | Net.set_user_data(index, data)                                      | 任意のユーザ用データを設定する       |

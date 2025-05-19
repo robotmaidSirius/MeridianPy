@@ -93,7 +93,7 @@ class Net:
         self._send_data[14] = int(yaw)
         if self.is_debug:
             print(f"{datetime.datetime.now()} : Set DMP direction: roll={roll}, pitch={pitch}, yaw={yaw}")
-    def set_remote_buttons(self, button: PadState):
+    def set_pad(self, button: PadState):
         self._send_data[15] = (   1 if button.SELECT else 0) \
                             + (   2 if button.R3 else 0) + (   4 if button.L3 else 0) \
                             + (   8 if button.START else 0) \
