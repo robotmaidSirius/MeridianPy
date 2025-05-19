@@ -20,9 +20,6 @@ dynamic = ["version"]
 [project.urls]
 Homepage = "https://ninagawa123.github.io/Meridian_info/"
 
-[tool.poetry]
-packages = [{include = "meridian", from = "src"}]
-
 [tool.setuptools]
 package-dir = {"" = "src"}
 

@@ -110,14 +110,14 @@ class Net:
         # モーション設定のフレーム数を設定する
         self._send_data[19] = ((int(frames) & 0xFF) << 8) | (int(stop_frames) & 0xFF)
         if self.is_debug:
-            print(f"{datetime.datetime.now()} : Set MRD motion frames: frames={frames}, stop_frames={stop_frames}")
+            print(f"{datetime.datetime.now()} : Set motion frames: frames={frames}, stop_frames={stop_frames}")
     def set_motion_data(self, index, motion_command1, motion_command2, value):
         if index < 0 or index >= 30:
             raise ValueError("Index out of range")
         self._send_data[(index*2) + 20] = ((int(motion_command1) & 0xFF) << 8) | (int(motion_command2) & 0xFF)
         self._send_data[(index*2) + 21] = int(value)
         if self.is_debug:
-            print(f"{datetime.datetime.now()} : Set MRD motion data: index={index}, data={motion_command1}, {motion_command2}, {value}")
+            print(f"{datetime.datetime.now()} : Set motion data: index={index}, motion_command1={motion_command1}, motion_command2={motion_command2}, value={value}")
     def set_user_data(self, index, data):
         # 80 から
         # ユーザーデータを設定する
