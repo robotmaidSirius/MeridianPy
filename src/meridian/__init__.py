@@ -3,8 +3,8 @@ import numpy
 import asyncio
 import socket
 from contextlib import closing
-from enum import Enum
 import datetime
+from enum import Enum
 
 class PadState(Enum):
     START : bool
