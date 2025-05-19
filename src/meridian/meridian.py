@@ -1,5 +1,4 @@
 #!python
-
 import numpy
 import asyncio
 import socket
@@ -49,6 +48,13 @@ class Net:
     _receive_data = [0] * MESSAGE_SIZE  # 受信するデータ
     _is_receiving = False               # 受信中のフラグ
 
+    def __init__(self, send_ip, send_port=22224):
+        self._receive_data = numpy.zeros(Net.MESSAGE_SIZE, dtype=numpy.uint16)
+        self._send_data = numpy.zeros(Net.MESSAGE_SIZE, dtype=numpy.uint16)
+        self._send_ip = send_ip
+        self._send_port = send_port
+        if self.is_debug:
+            print(f"{datetime.datetime.now()} : IP address set to {self._send_ip} and port set to {self._send_port}")
     def set_master_command(self, command : MasterCommand):
         # マスターコマンドを設定する
         self._send_data[0] = command.value
@@ -87,15 +93,6 @@ class Net:
         self._send_data[14] = int(yaw)
         if self.is_debug:
             print(f"{datetime.datetime.now()} : Set DMP direction: roll={roll}, pitch={pitch}, yaw={yaw}")
-    def set_remote_buttons(self, buttons, stick_l, stick_r, l2r2analog):
-        # TODO: ボタンの定義する
-        # リモコンボタン、スティック、アナログ値を設定する
-        self._send_data[15] = int(buttons)
-        self._send_data[16] = int(stick_l)
-        self._send_data[17] = int(stick_r)
-        self._send_data[18] = int(l2r2analog)
-        if self.is_debug:
-            print(f"{datetime.datetime.now()} : Set remote buttons: buttons={buttons}, stick_l={stick_l}, stick_r={stick_r}, l2r2analog={l2r2analog}")
     def set_remote_buttons(self, button: PadState):
         self._send_data[15] = (   1 if button.SELECT else 0) \
                             + (   2 if button.R3 else 0) + (   4 if button.L3 else 0) \
@@ -109,21 +106,19 @@ class Net:
         self._send_data[18] = ((int(button.R_ANALOG_STICK)     & 0xFF) << 8) | (int(button.L_ANALOG_STICK)   & 0xFF)
         if self.is_debug:
             print(f"{datetime.datetime.now()} : Set remote buttons: buttons={buttons}, stick_l={stick_l}, stick_r={stick_r}, l2r2analog={l2r2analog}")
-
-
-    def set_mrd_motion_frames(self, frames, stop_frames):
+    def set_motion_frames(self, frames, stop_frames):
         # モーション設定のフレーム数を設定する
         self._send_data[19] = ((int(frames) & 0xFF) << 8) | (int(stop_frames) & 0xFF)
         if self.is_debug:
             print(f"{datetime.datetime.now()} : Set MRD motion frames: frames={frames}, stop_frames={stop_frames}")
-    def set_mrd_motion_data(self, index, motion_command1, motion_command2, value):
+    def set_motion_data(self, index, motion_command1, motion_command2, value):
         if index < 0 or index >= 30:
             raise ValueError("Index out of range")
         self._send_data[(index*2) + 20] = ((int(motion_command1) & 0xFF) << 8) | (int(motion_command2) & 0xFF)
         self._send_data[(index*2) + 21] = int(value)
         if self.is_debug:
             print(f"{datetime.datetime.now()} : Set MRD motion data: index={index}, data={data}")
-    def set_mrd_user_data(self, index, data):
+    def set_user_data(self, index, data):
         # 80 から
         # ユーザーデータを設定する
         if index < 0 or index >= 8:
@@ -142,6 +137,30 @@ class Net:
         self._send_data[88] = 0
         if self.is_debug:
             print(f"{datetime.datetime.now()} : Clear error code")
+
+    def start_receive_message(self, ip="localhost", port=22222):
+        self._is_receiving = False
+        asyncio.run(self._receive(ip, port))
+    def send(self):
+        data = self._send_data
+        # バッファーから送信データを詰め込む
+        index = self._receive_data[1] if self._send_data[1] > self._send_data[1] else self._send_data[1]
+        data[1] = index + 1 if index <= 59998 else index - 59999
+        self._send_data[1] = data[1]
+        self._set_checksum(data)        # チェックサム計算する
+        with closing(socket.socket(socket.AF_INET, socket.SOCK_DGRAM)) as sock:
+            sock.sendto(data, (self._send_ip, self._send_port))
+            if self.is_debug:
+                print(f"{datetime.datetime.now()} : Sent data to {self._send_ip}:{self._send_port}")
+        return self._send_data
+    def receive(self):
+        # 受信データを設定する
+        if self.is_debug:
+            print(f"{datetime.datetime.now()} : Received data: {self._receive_data}")
+        data = self._receive_data
+        if self._receive_data[1] > self._send_data[1]:
+            self._send_data = data
+        return data
 
     def _set_checksum(self, data):
         # チェックサムを設定する
@@ -162,41 +181,6 @@ class Net:
             return False
         else:
             return True
-
-    def __init__(self, send_ip, send_port=22224):
-        self._receive_data = numpy.zeros(Net.MESSAGE_SIZE, dtype=numpy.uint16)
-        self._send_data = numpy.zeros(Net.MESSAGE_SIZE, dtype=numpy.uint16)
-        self._send_ip = send_ip
-        self._send_port = send_port
-        if self.is_debug:
-            print(f"{datetime.datetime.now()} : IP address set to {self._send_ip} and port set to {self._send_port}")
-
-    def start_receive_message(self, ip="localhost", port=22222):
-        self._is_receiving = False
-        asyncio.run(self._receive(ip, port))
-
-    def send(self):
-        data = self._send_data
-        # バッファーから送信データを詰め込む
-        index = self._receive_data[1] if self._send_data[1] > self._send_data[1] else self._send_data[1]
-        data[1] = index + 1 if index <= 59998 else index - 59999
-        self._send_data[1] = data[1]
-        self._set_checksum(data)        # チェックサム計算する
-        with closing(socket.socket(socket.AF_INET, socket.SOCK_DGRAM)) as sock:
-            sock.sendto(data, (self._send_ip, self._send_port))
-            if self.is_debug:
-                print(f"{datetime.datetime.now()} : Sent data to {self._send_ip}:{self._send_port}")
-        return self._send_data
-
-    def receive(self):
-        # 受信データを設定する
-        if self.is_debug:
-            print(f"{datetime.datetime.now()} : Received data: {self._receive_data}")
-        data = self._receive_data
-        if self._receive_data[1] > self._send_data[1]:
-            self._send_data = data
-        return data
-
     async def _receive(self, ip, port):
         await asyncio.sleep(1)
         if self.is_debug:
