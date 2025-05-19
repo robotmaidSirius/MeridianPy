@@ -1,4 +1,4 @@
-#!python
+# !/usr/bin/env python
 import numpy
 import asyncio
 import socket
