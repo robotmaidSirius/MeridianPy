@@ -117,7 +117,7 @@ class Net:
         self._send_data[(index*2) + 20] = ((int(motion_command1) & 0xFF) << 8) | (int(motion_command2) & 0xFF)
         self._send_data[(index*2) + 21] = int(value)
         if self.is_debug:
-            print(f"{datetime.datetime.now()} : Set MRD motion data: index={index}, data={data}")
+            print(f"{datetime.datetime.now()} : Set MRD motion data: index={index}, data={motion_command1}, {motion_command2}, {value}")
     def set_user_data(self, index, data):
         # 80 から
         # ユーザーデータを設定する
