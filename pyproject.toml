@@ -23,8 +23,11 @@ Homepage = "https://ninagawa123.github.io/Meridian_info/"
 [tool.poetry]
 packages = [{include = "meridian", from = "src"}]
 
-[tool.setuptools.packages.find]
-exclude = ["build", "tests"]
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages]
+find = {where = ["src"], include = ["meridian"]}
 
 [tool.setuptools_scm]
-write_to = "meridian/_version.py"
+write_to = "src/meridian/_version.py"
