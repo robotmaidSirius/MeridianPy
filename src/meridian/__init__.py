@@ -176,7 +176,7 @@ class Net:
             print(f"{datetime.datetime.now()} : Set checksum: {checksum}")
     def _check_checksum(self, data):
         # チェックサムを確認する
-        checksum = 0
+        checksum = 1 # 受信したチェックサムは「1の補数」のため、判定式をしやすいように「2の補数」として扱う
         for i in range(0, Net.MESSAGE_SIZE):
             checksum = (checksum + data[i]) & 0xFFFF
         if(checksum & 0xFFFF) != 0:
