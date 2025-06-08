@@ -169,7 +169,9 @@ class Net:
             checksum += data[i]
         checksum = checksum & 0xFFFF
         # 2の補数で設定
-        data[Net.MESSAGE_SIZE - 1] = ((~checksum)+1) & 0xFFFF
+        #data[Net.MESSAGE_SIZE - 1] = ((~checksum)+1) & 0xFFFF
+        # 1の補数で設定
+        data[Net.MESSAGE_SIZE - 1] = ((~checksum)) & 0xFFFF
         if self.is_debug:
             print(f"{datetime.datetime.now()} : Set checksum: {checksum}")
     def _check_checksum(self, data):
