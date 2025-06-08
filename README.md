@@ -12,6 +12,9 @@ pip install -U ./
 python -m build .
 cd dist
 pip install -U [ビルドした.whl]
+
+# githubからインストール (タグ指定する場合は、`@v0.0.1`のようにURLに追加することで指定できます)
+pip install meridian@git+https://github.com/robotmaidSirius/MeridianPy.git
 ```
 
 ## クラス一覧
